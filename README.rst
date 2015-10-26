@@ -1,1 +1,3 @@
-# complex_fields
+==============
+django-complex-fields
+==============
