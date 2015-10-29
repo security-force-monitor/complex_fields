@@ -4,6 +4,7 @@ __pycache__/
 
 # Vim
 *.*~
+*.swp
 
 # Distribution / packaging
 .Python
