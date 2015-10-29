@@ -5,7 +5,7 @@ from complex_fields.models import ComplexFieldListContainer
 
 register = Library()
 
-@register.inclusion_tag('complexfield/view_autocomplete.html')
+@register.inclusion_tag('view_autocomplete.html')
 def view_complex_field_autocomplete(field, object_id, source_url, path):
     if isinstance(field, str):
         raise Exception("Can't render field: field is str")

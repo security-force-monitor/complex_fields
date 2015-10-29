@@ -2,7 +2,7 @@ from django.template import Library
 
 register = Library()
 
-@register.inclusion_tag('complexfield/view_geo.html')
+@register.inclusion_tag('view_geo.html')
 def view_complex_field_geo(field, object_id, geo_form, path):
     field_id = field.get_field_str_id()
     if object_id is None:

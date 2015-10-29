@@ -2,7 +2,7 @@ from django.template import Library
 
 register = Library()
 
-@register.inclusion_tag('complexfield/view_boolean.html')
+@register.inclusion_tag('view_boolean.html')
 def view_complex_field_boolean(field, object_id, path):
     field_id = field.get_field_str_id()
     if object_id is None:
