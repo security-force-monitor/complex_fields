@@ -7,17 +7,14 @@ with open('README.rst', 'rb') as f:
 
 setup(
     name = "django-complex-fields",
-    version = "0.1",
+    version = "0.1.0",
     license = "LGPL",
     description = "An extenstion for Django that provides translation, version and source by field. Can be adapted to personalize fields",
     long_description = "long_description",
     author = "Guillaume Auger",
     author_email = "gauger@caravan.coop",
     url = "https://github.com/caravancoop/complex-fields",
-    packages = find_packages("src"),
-    package_dir = {
-        "": "src",
-    },
+    packages = find_packages(),
     package_data = {
         "complex_fields": ["templates/*.html"]
     },
