@@ -315,12 +315,15 @@ class ComplexFieldContainer(object):
             except fk_model.DoesNotExist:
                 return (None, _("This value does not exists"))
 
-            #foreign_class = c_field._meta.get_field('value').rel.to
-            #object_ = foreign_class.from_id(int(value))
             #return (object_, None)
             return (value, None)
-        else:
-            return (value, None)
+
+        elif internal_type == "IntegerField":
+            if value == "":
+                return (0, None)
+
+        return (value, None)
+
 
 
 
