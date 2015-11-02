@@ -47,11 +47,15 @@ class BaseModel(object):
                 sources = Source.create_sources(
                     dict_values[field_name].get('sources', [])
                 )
-                sources = {
-                    'confidence': dict_values[field_name]['confidence'],
-                    'sources': sources,
-                }
-                field.update(dict_values[field_name]['value'], lang, sources)
+
+                if field.sourced:
+                    sources = {
+                        'confidence': dict_values[field_name]['confidence'],
+                        'sources': sources,
+                    }
+                    field.update(dict_values[field_name]['value'], lang, sources)
+                else:
+                    field.update(dict_values[field_name]['value'], lang)
 
     @classmethod
     def create(cls, dict_values, lang=get_language()):
