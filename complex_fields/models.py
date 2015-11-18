@@ -262,6 +262,14 @@ class ComplexFieldContainer(object):
             c_field = self.get_field(lang)
         else:
             c_field = self.get_field(None)
+
+        # No update needed if value or sources don't change
+        if (c_field is not None and
+            c_field.value == value and
+            self.has_same_sources(sources)
+        ):
+            return
+
         sources_updated = False
 
         if self.translated:
