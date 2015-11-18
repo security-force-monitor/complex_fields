@@ -409,7 +409,10 @@ class ComplexFieldContainer(object):
         if not self.get_confidence() == sources['confidence']:
             return False
 
-        sources = sources['sources']
+        sources = [
+            {"source": src.source}
+            for src in sources['sources']
+        ]
 
         saved_sources = []
         for src in self.get_sources():
