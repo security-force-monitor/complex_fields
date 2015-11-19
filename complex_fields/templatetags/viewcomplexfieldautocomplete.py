@@ -19,10 +19,7 @@ def view_complex_field_autocomplete(field, object_id, source_url, path):
         value_id = None
 
     if not isinstance(value, str) and value is not None:
-        if hasattr(value, "get_value"):
-            value = value.get_value()
-        else:
-            value = value.value
+        value = str(value)
 
     return {
         'value' : value,

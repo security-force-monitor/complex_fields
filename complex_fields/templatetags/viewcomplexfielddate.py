@@ -11,7 +11,7 @@ def view_complex_field_date(field, object_id, path):
     if value is None:
         value = ''
     else:
-        value = repr(value)
+        value = repr(value.value)
     return {
         'value' : value,
         'object_id': object_id,

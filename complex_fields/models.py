@@ -59,6 +59,12 @@ class ComplexField(models.Model):
                     # we ignore it.
                     pass
 
+    def __str__(self):
+        if self.value is None:
+            return ""
+        return str(self.value)
+
+
 class ComplexFieldContainer(object):
     def __init__(self, table_object, field_model, id_=None):
         self.table_object = table_object
@@ -70,9 +76,12 @@ class ComplexFieldContainer(object):
 
     def __str__(self):
         value = self.get_value(get_language())
+
         if value is None:
-            value = ""
-        return value
+            value = self.get_value('en')
+            if value is None:
+                value = ""
+        return str(value)
 
     @property
     def field_name(self):
@@ -133,7 +142,11 @@ class ComplexFieldContainer(object):
     def get_value(self, lang=get_language()):
         field = self.get_field(lang)
         if field is not None:
-            return field.value
+            return field
+        else:
+            field = self.get_field('en')
+            if field is not None:
+                return field
         return None
 
     def set_value(self, value, lang=get_language()):

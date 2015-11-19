@@ -9,7 +9,10 @@ def view_complex_field_geo(field, object_id, geo_form, path):
         object_id = 0
     value = field.get_value()
     if value is not None:
-        value = value.geojson
+        value = value.value
+        if value is not None:
+            value = value.geojson
+
     return {
         'value' : value,
         'object_id': object_id,
