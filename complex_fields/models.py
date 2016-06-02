@@ -275,6 +275,7 @@ class ComplexFieldContainer(object):
             c_field = self.get_field(lang)
         else:
             c_field = self.get_field(None)
+        
 
         # No update needed if value or sources don't change
         if (c_field is not None and
@@ -307,7 +308,7 @@ class ComplexFieldContainer(object):
             c_field = self.field_model(object_ref=self.table_object, lang=lang)
         else:
             c_field = self.field_model(object_ref=self.table_object)
-
+        
         c_field.value = value
         c_field.save()
 
@@ -319,28 +320,26 @@ class ComplexFieldContainer(object):
     def adapt_value(self, value):
         c_field = self.field_model()
         internal_type = c_field._meta.get_field('value').get_internal_type()
-        if internal_type == "BooleanField":
-            if value == "False" or value == "":
+        
+        if internal_type.strip() == "BooleanField":
+            if value.strip() == "False" or value == "":
                 return (False, None)
-            elif value == "True":
+            elif value.strip() == "True":
                 return (True, None)
             else:
                 return (None, "Invalid value for this field")
-        elif internal_type == "ForeignKey":
+        elif internal_type.strip() == "ForeignKey":
             if value == "":
                 return (None, None)
 
             fk_model = self.get_fk_model()
-            try:
-                value = fk_model.objects.get(pk=value)
-            except fk_model.DoesNotExist:
-                return (None, _("This value does not exists"))
+            value, created = fk_model.objects.get_or_create(value=value)
 
             #return (object_, None)
             return (value, None)
 
-        elif internal_type == "IntegerField":
-            if value == "":
+        elif internal_type.strip() == "IntegerField":
+            if value.strip() == "":
                 return (0, None)
 
         return (value, None)
@@ -398,6 +397,7 @@ class ComplexFieldContainer(object):
         c_field.save()
 
     def validate(self, value, lang, sources={}):
+
         if (hasattr(self.field_model(), "source_required") and
             value != ""):
             if not len(sources['sources']) :

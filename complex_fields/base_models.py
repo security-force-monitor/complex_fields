@@ -42,11 +42,9 @@ class BaseModel(object):
         self.save()
         for field in self.complex_fields:
             field_name = field.get_field_str_id()
-
+            
             if field_name in dict_values:
-                sources = Source.create_sources(
-                    dict_values[field_name].get('sources', [])
-                )
+                sources = dict_values[field_name].get('sources', [])
 
                 if field.sourced:
                     sources = {
@@ -61,6 +59,8 @@ class BaseModel(object):
     def create(cls, dict_values, lang=get_language()):
         field = cls()
         field.update(dict_values, lang)
+        
+        print('field', field, dict_values)
 
         return field
 
