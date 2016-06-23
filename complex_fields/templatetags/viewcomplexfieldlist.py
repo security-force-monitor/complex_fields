@@ -2,38 +2,27 @@ from django.template import Library
 from django_date_extensions.fields import ApproximateDate
 
 from complex_fields.models import ComplexFieldListContainer
+from .viewcomplexfield import view_complex_field
 
 register = Library()
 
 @register.inclusion_tag('view_list.html')
-def view_complex_field_list(field, object_id, path):
+def view_complex_field_list(field_list, object_id, path):
     
-    print('field', field.get_value())
+    fields = {'field_list': []}
 
-    if isinstance(field, str):
-        raise Exception("Can't render field: field is str")
-    if object_id is None:
-        object_id = 0
+    for field in field_list.get_list():
+        
+        field_info = view_complex_field(field, object_id, path)
 
-    value = field.get_value()
-    if (not isinstance(value, str) and not isinstance(value, int) and
-        value is not None and not isinstance(value, ApproximateDate)):
-        if hasattr(value, "get_value"):
-            value = value.get_value()
-        else:
-            value = value.value
+        fields['field_name'] = field_info['field_name']
+        fields['field_str_id'] = field_info['field_str_id']
 
-    return {
-        'value' : value,
-        'object_id': object_id,
-        'object_name': field.get_object_name(),
-        'field_str_id': field.get_field_str_id(),
-        'attr_name': field.get_attr_name(),
-        'field_name': field.field_name,
-        'sourced': field.sourced,
-        'translated': field.translated,
-        'versioned': field.versioned,
-        'is_list': isinstance(field, ComplexFieldListContainer),
-        'field_id': field.id_,
-        'path': path,
-    }
+        fields['field_list'].append({
+            'value' : field_info['value'],
+            'object_id': field_info['object_id'],
+            'field_id': field_info['field_id'],
+            'path': path,
+        })
+    
+    return fields

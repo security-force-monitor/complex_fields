@@ -2,7 +2,8 @@
 
 <label for="{{field_str_id}}">{{field_name}}</label>
 <select class="form-control" id="{{ field_str_id }}" multiple=true>
-    <option></option>
+    {% for field in field_list %}
+        <option value="{{ field.field_id }}" selected=true>{{ field.value.value }}</option>
+    {% endfor %}
 </select>
-<input type="text" class="form-control real-input" id="{{ field_str_id }}" value="{% if value %}{{ value }}{% endif %}" placeholder="Enter {{field_name}}">
 <span class="error-message" data-em-target={{ field_str_id }}></span>
