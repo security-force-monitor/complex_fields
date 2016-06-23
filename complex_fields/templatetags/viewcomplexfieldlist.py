@@ -5,8 +5,10 @@ from complex_fields.models import ComplexFieldListContainer
 
 register = Library()
 
-@register.inclusion_tag('view.html')
-def view_complex_field(field, object_id, path):
+@register.inclusion_tag('view_list.html')
+def view_complex_field_list(field, object_id, path):
+    
+    print('field', field.get_value())
 
     if isinstance(field, str):
         raise Exception("Can't render field: field is str")

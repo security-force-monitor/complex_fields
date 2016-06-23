@@ -4,6 +4,8 @@ register = Library()
 
 @register.inclusion_tag('view_date.html')
 def view_complex_field_date(field, object_id, path):
+    if not field:
+        return {}
     field_id = field.get_field_str_id()
     if object_id is None:
         object_id = 0

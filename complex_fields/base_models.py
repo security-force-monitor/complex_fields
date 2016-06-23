@@ -60,7 +60,5 @@ class BaseModel(object):
         field = cls()
         field.update(dict_values, lang)
         
-        print('field', field, dict_values)
-
         return field
 

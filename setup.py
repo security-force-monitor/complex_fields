@@ -21,7 +21,7 @@ setup(
     zip_safe=False,
     install_requires=[
         "Django>=1.8.3",
-        "django-reversion==1.9.3",
+        "django-reversion==2.0.4",
     ],
     classifiers = [
         "Development Status :: 2 - Pre-Alpha",
