@@ -1,5 +1,7 @@
 {% load i18n %}
 
-<label for="{{field_str_id}}">{{field_name}}</label>
-<input type="text" class="form-control real-input" id="{{ field_str_id }}" value="{% if value %}{{ value }}{% endif %}" placeholder="Enter {{field_name}}">
+<label for="{{field_str_id}}" class="control-label col-sm-2">{{field_name}}</label>
+<div class="col-sm-8">
+    <input type="text" class="form-control real-input" id="{{ field_str_id }}" value="{% if value %}{{ value }}{% endif %}" placeholder="Enter {{field_name}}">
+</div>
 <span class="error-message" data-em-target={{ field_str_id }}></span>

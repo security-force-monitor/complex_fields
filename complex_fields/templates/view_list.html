@@ -1,9 +1,11 @@
 {% load i18n %}
 
-<label for="{{field_str_id}}">{{field_name}}</label>
-<select class="form-control" id="{{ field_str_id }}" multiple=true>
-    {% for field in field_list %}
-        <option value="{{ field.field_id }}" selected=true>{{ field.value.value }}</option>
-    {% endfor %}
-</select>
+<label for="{{field_str_id}}" class="control-label col-sm-2">{{field_name}}</label>
+<div class="col-sm-8">
+    <select class="form-control" id="{{ field_str_id }}" multiple=true>
+        {% for field in field_list %}
+            <option value="{{ field.field_id }}" selected=true>{{ field.value.value }}</option>
+        {% endfor %}
+    </select>
+</div>
 <span class="error-message" data-em-target={{ field_str_id }}></span>
