@@ -2,6 +2,11 @@ from django.utils.translation import get_language
 
 from source.models import Source
 
+class SourceRequiredException(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+
 class BaseModel(object):
     def __init__(self):
         pass
@@ -44,9 +49,14 @@ class BaseModel(object):
             field_name = field.get_field_str_id()
             
             if field_name in dict_values:
-                sources = dict_values[field_name].get('sources', [])
 
                 if field.sourced:
+                    
+                    try:
+                        sources = dict_values[field_name]['sources']
+                    except KeyError:
+                        raise SourceRequiredException('The field {} requires a source'.format(field_name))
+                    
                     sources = {
                         'confidence': dict_values[field_name]['confidence'],
                         'sources': sources,
