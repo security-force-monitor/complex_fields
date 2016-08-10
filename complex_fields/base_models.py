@@ -6,8 +6,14 @@ class SourceRequiredException(Exception):
     def __init__(self, message):
         super().__init__(message)
 
+class ConfidenceRequiredException(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
 
 class BaseModel(object):
+    confidence_required = True
+
     def __init__(self):
         pass
 
@@ -57,8 +63,14 @@ class BaseModel(object):
                     except KeyError:
                         raise SourceRequiredException('The field {} requires a source'.format(field_name))
                     
+                    try:
+                        confidence = dict_values[field_name]['confidence']
+                    except KeyError:
+                        if self.confidence_required:
+                            raise ConfidenceRequiredException('The field {} requires a confidence'.format(field_name))
+
                     sources = {
-                        'confidence': dict_values[field_name]['confidence'],
+                        'confidence': confidence,
                         'sources': sources,
                     }
                     field.update(dict_values[field_name]['value'], lang, sources)
