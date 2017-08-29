@@ -314,6 +314,7 @@ class ComplexFieldContainer(object):
 
         if self.sourced:
             c_field.confidence = sources['confidence']
+            c_field.save()
             for source in sources.get('sources', []):
                 c_field.sources.add(source)
 
