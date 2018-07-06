@@ -24,7 +24,7 @@ CONFIDENCE_LEVELS = (
 
 class ComplexField(models.Model):
     lang = models.CharField(max_length=5, null=True)
-    accesspoints = models.ManyToManyField(AccessPoint, related_name="%(app_label)s_%(class)s_related")
+    sources = models.ManyToManyField(AccessPoint, related_name="%(app_label)s_%(class)s_related")
     confidence = models.CharField(max_length=1, default=1, choices=CONFIDENCE_LEVELS)
 
     class Meta:
@@ -34,7 +34,7 @@ class ComplexField(models.Model):
         if hasattr(self, 'versioned'):
             version = reversion.get_for_object(self).get(id=id)
             version.revert()
-            return version.field_dict['accesspoints']
+            return version.field_dict['sources']
 
     def revert_to_source(self, source_ids):
         if hasattr(self, 'versioned'):
@@ -42,13 +42,13 @@ class ComplexField(models.Model):
             version = None
             max_id = 0
             for vers in versions:
-                if vers.field_dict['accesspoints'] == source_ids and vers.id > max_id:
+                if vers.field_dict['sources'] == source_ids and vers.id > max_id:
                     version = vers
                     max_id = vers.id
 
             if version is None:
                 for vers in versions:
-                    if vers.field_dict['accesspoints'] == [] and vers.id > max_id:
+                    if vers.field_dict['sources'] == [] and vers.id > max_id:
                         version = vers
 
             if version is not None:
@@ -189,17 +189,17 @@ class ComplexFieldContainer(object):
 
         return translations
 
-    def get_accesspoints(self):
-        accesspoints = []
+    def get_sources(self):
+        sources = []
         if not self.sourced:
-            return accesspoints
+            return sources
 
         c_fields = self.field_model.objects.filter(object_ref=self.table_object)
         field = list(c_fields[:1])
         if field:
-            accesspoints = field[0].accesspoints.all()
+            sources = field[0].sources.all()
 
-        return accesspoints
+        return sources
 
     def get_confidence(self):
         field = self.get_field()
@@ -207,40 +207,40 @@ class ComplexFieldContainer(object):
             return '1'
         return field.confidence
 
-    def update(self, value, lang, accesspoints={}):
+    def update(self, value, lang, sources={}):
         if not self.translated:
             c_field = self.get_field(lang)
         else:
             c_field = self.get_field(None)
 
 
-        # No update needed if value or accesspoints don't change
+        # No update needed if value or sources don't change
         if (c_field is not None and
             c_field.value == value and
-            self.has_same_accesspoints(accesspoints)
+            self.has_same_sources(sources)
         ):
             return
 
-        accesspoints_updated = False
+        sources_updated = False
 
         if self.translated:
-            accesspoints_updated = self.update_translations(value, lang, accesspoints)
+            sources_updated = self.update_translations(value, lang, sources)
 
         if c_field is None:
-            return self.update_new(value, lang, accesspoints)
+            return self.update_new(value, lang, sources)
 
-        if self.sourced and not self.has_same_accesspoints(accesspoints):
-            accesspoints_updated = True
-            c_field.confidence = accesspoints['confidence']
-            for source in accesspoints.get('accesspoints', []):
-                c_field.accesspoints.add(source)
+        if self.sourced and not self.has_same_sources(sources):
+            sources_updated = True
+            c_field.confidence = sources['confidence']
+            for source in sources.get('sources', []):
+                c_field.sources.add(source)
 
         # New version only if there was a change on this field
-        if c_field.value != value or accesspoints_updated:
+        if c_field.value != value or sources_updated:
             c_field.value = value
             c_field.save()
 
-    def update_new(self, value, lang, accesspoints={}):
+    def update_new(self, value, lang, sources={}):
         if self.translated:
             c_field = self.field_model(object_ref=self.table_object, lang=lang)
         else:
@@ -250,10 +250,10 @@ class ComplexFieldContainer(object):
         c_field.save()
 
         if self.sourced:
-            c_field.confidence = accesspoints['confidence']
+            c_field.confidence = sources['confidence']
             c_field.save()
-            for source in accesspoints.get('accesspoints', []):
-                c_field.accesspoints.add(source)
+            for source in sources.get('sources', []):
+                c_field.sources.add(source)
 
     def adapt_value(self, value):
         c_field = self.field_model()
@@ -282,12 +282,9 @@ class ComplexFieldContainer(object):
 
         return (value, None)
 
-
-
-
-    def update_translations(self, value, lang, accesspoints):
+    def update_translations(self, value, lang, sources):
         c_fields = self.field_model.objects.filter(object_ref=self.table_object)
-        accesspoints_updated = False
+        sources_updated = False
 
         for field in c_fields:
             # Set translation values to None if the value is changed or False
@@ -295,18 +292,18 @@ class ComplexFieldContainer(object):
             if field is None or field.value != value:
                 field.value = None
 
-            # Update accesspoints for all translations if they are not the same
-            if self.sourced and not self.has_same_accesspoints(accesspoints):
-                accesspoints_updated = True
-                field.accesspoints.clear()
-                for source in accesspoints['accesspoints']:
-                    field.accesspoints.add(source)
-                field.confidence = accesspoints['confidence']
+            # Update sources for all translations if they are not the same
+            if self.sourced and not self.has_same_sources(sources):
+                sources_updated = True
+                field.sources.clear()
+                for source in sources['sources']:
+                    field.sources.add(source)
+                field.confidence = sources['confidence']
 
             if field.lang != lang:
                 field.save()
 
-        return accesspoints_updated
+        return sources_updated
 
     def translate(self, value, lang):
         c_fields = self.field_model.objects.filter(object_ref=self.table_object)
@@ -327,20 +324,20 @@ class ComplexFieldContainer(object):
         c_field.save()
 
         if hasattr(c_field, 'sourced'):
-            with_accesspoints = c_fields.exclude(accesspoints=None)
-            accesspoints = with_accesspoints[0].accesspoints.all()
-            for src in accesspoints:
-                c_field.accesspoints.add(src)
+            with_sources = c_fields.exclude(sources=None)
+            sources = with_sources[0].sources.all()
+            for src in sources:
+                c_field.sources.add(src)
 
         c_field.save()
 
-    def validate(self, value, lang, accesspoints={}):
+    def validate(self, value, lang, sources={}):
 
         if (hasattr(self.field_model(), "source_required") and
             value != ""):
-            if not len(accesspoints['accesspoints']) :
-                return ("accesspoints are required to update this field", value)
-            elif accesspoints['confidence'] == 0 :
+            if not len(sources['sources']) :
+                return ("sources are required to update this field", value)
+            elif sources['confidence'] == 0 :
                 return ("A confidence must be set for this field", value)
 
 
@@ -356,22 +353,22 @@ class ComplexFieldContainer(object):
         return None
 
 
-    def has_same_accesspoints(self, accesspoints):
-        if not self.get_confidence() == accesspoints['confidence']:
+    def has_same_sources(self, sources):
+        if not self.get_confidence() == sources['confidence']:
             return False
 
-        accesspoints = [
+        sources = [
             {"source": src.source}
-            for src in accesspoints['accesspoints']
+            for src in sources['sources']
         ]
 
-        saved_accesspoints = []
-        for src in self.get_accesspoints():
+        saved_sources = []
+        for src in self.get_sources():
             saved_src = {}
             saved_src['source'] = src.source
-            saved_accesspoints.append(saved_src)
-        pairs = zip(saved_accesspoints, accesspoints)
-        if len(saved_accesspoints) != len(accesspoints) or any(x != y for x, y in pairs):
+            saved_sources.append(saved_src)
+        pairs = zip(saved_sources, sources)
+        if len(saved_sources) != len(sources) or any(x != y for x, y in pairs):
             return False
         return True
 
