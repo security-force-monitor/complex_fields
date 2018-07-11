@@ -10,7 +10,7 @@ from django.utils.translation import get_language
 
 from languages_plus.models import Language
 
-from source.models import AccessPoint
+from source.models import AccessPoint, Source
 from translation.models import get_language_from_iso
 from sfm_pc.utils import class_for_name
 
@@ -24,7 +24,8 @@ CONFIDENCE_LEVELS = (
 
 class ComplexField(models.Model):
     lang = models.CharField(max_length=5, null=True)
-    sources = models.ManyToManyField(AccessPoint, related_name="%(app_label)s_%(class)s_related")
+    sources = models.ManyToManyField(Source, related_name="%(app_label)s_%(class)s_related")
+    accesspoints = models.ManyToManyField(AccessPoint, related_name="%(app_label)s_%(class)s_related")
     confidence = models.CharField(max_length=1, default=1, choices=CONFIDENCE_LEVELS)
 
     class Meta:
