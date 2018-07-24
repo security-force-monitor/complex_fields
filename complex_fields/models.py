@@ -359,14 +359,14 @@ class ComplexFieldContainer(object):
             return False
 
         sources = [
-            {"source": src.source}
+            {"source": src}
             for src in sources['sources']
         ]
 
         saved_sources = []
         for src in self.get_sources():
             saved_src = {}
-            saved_src['source'] = src.source
+            saved_src['source'] = src
             saved_sources.append(saved_src)
         pairs = zip(saved_sources, sources)
         if len(saved_sources) != len(sources) or any(x != y for x, y in pairs):
@@ -417,3 +417,8 @@ class ComplexFieldListContainer(object):
             return field
         except self.field_model.DoesNotExist:
             return None
+
+    def get_field_str_id(self):
+        table_name = self.table_object.__class__.__name__
+        field_name = self.field_model.__name__
+        return table_name + "_" + field_name
