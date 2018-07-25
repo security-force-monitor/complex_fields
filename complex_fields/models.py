@@ -214,7 +214,6 @@ class ComplexFieldContainer(object):
         else:
             c_field = self.get_field(None)
 
-
         # No update needed if value or sources don't change
         if (c_field is not None and
             c_field.value == value and
@@ -224,22 +223,13 @@ class ComplexFieldContainer(object):
 
         sources_updated = False
 
+        c_field.sources.set(sources['sources'], clear=True)
+
         if self.translated:
-            sources_updated = self.update_translations(value, lang, sources)
+            c_field.lang = lang
 
-        if c_field is None:
-            return self.update_new(value, lang, sources)
-
-        if self.sourced and not self.has_same_sources(sources):
-            sources_updated = True
-            c_field.confidence = sources['confidence']
-            for source in sources.get('sources', []):
-                c_field.sources.add(source)
-
-        # New version only if there was a change on this field
-        if c_field.value != value or sources_updated:
-            c_field.value = value
-            c_field.save()
+        c_field.value = value
+        c_field.save()
 
     def update_new(self, value, lang, sources={}):
         if self.translated:
@@ -248,6 +238,10 @@ class ComplexFieldContainer(object):
             c_field = self.field_model(object_ref=self.table_object)
 
         c_field.value = value
+
+        if self.translated:
+            c_field.lang = lang
+
         c_field.save()
 
         if self.sourced:

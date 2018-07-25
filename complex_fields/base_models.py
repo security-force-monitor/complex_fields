@@ -70,14 +70,13 @@ class BaseModel(object):
         update_values = set()
         current_values = set()
 
-        import pdb
-        pdb.set_trace()
-
         if complex_fields:
 
-            field_lookup = {v.get_value().value: v for v in complex_fields if v.get_value()}
+            field_lookup = {v.get_value().value: v for v in complex_fields}
 
-            current_values = {v.get_value().value for v in complex_fields if v.get_value()}
+            current_values = {v.get_value().value for v in complex_fields}
+
+        new_id_lookup = {}
 
         for value in dict_values[field_key]['values']:
             try:
@@ -86,6 +85,7 @@ class BaseModel(object):
                 value = field_model(value=value,
                                     object_ref=table_object)
                 value.save()
+                new_id_lookup[value.value] = value.id
 
             update_values.add(value.value)
 
@@ -93,8 +93,8 @@ class BaseModel(object):
         new_values = update_values - current_values
 
         for value in new_values:
-            field = complex_list.get_complex_field(0)
-            field.update_new(value, lang, dict_values[field_key])
+            field = complex_list.get_complex_field(new_id_lookup[value])
+            field.update(value, lang, dict_values[field_key])
 
         # check for things that were removed
         removed_values = current_values - update_values
