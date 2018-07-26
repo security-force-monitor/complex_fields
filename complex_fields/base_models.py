@@ -70,43 +70,41 @@ class BaseModel(object):
         update_values = set()
         current_values = set()
 
-        if complex_fields:
+        for field in field_model.objects.filter(object_ref=self):
+            field.sources.set(dict_values[field_key]['sources'], clear=True)
 
-            field_lookup = {v.get_value().value: v for v in complex_fields}
+        # TODO: Need to check to make sure Django is removing things as well
+        # when the form validation happens
 
-            current_values = {v.get_value().value for v in complex_fields}
+        # if complex_fields:
 
-        new_id_lookup = {}
+        #     field_lookup = {v.get_value().value: v for v in complex_fields}
 
-        for value in dict_values[field_key]['values']:
-            try:
-                value = field_model.objects.get(id=value)
-            except (ObjectDoesNotExist, ValueError):
-                value = field_model(value=value,
-                                    object_ref=table_object)
-                value.save()
-                new_id_lookup[value.value] = value.id
+        #     current_values = {v.get_value().value for v in complex_fields}
 
-            update_values.add(value.value)
+        # new_id_lookup = {}
 
-        # check for new things
-        new_values = update_values - current_values
+        # for value in dict_values[field_key]['values']:
+        #     update_values.add(value.value)
 
-        for value in new_values:
-            field = complex_list.get_complex_field(new_id_lookup[value])
-            field.update(value, lang, dict_values[field_key])
+        # # check for new things
+        # new_values = update_values - current_values
 
-        # check for things that were removed
-        removed_values = current_values - update_values
-        for value in removed_values:
-            field = field_lookup[value].get_value()
-            if field:
-                field.delete()
+        # for value in new_values:
+        #     field = complex_list.get_complex_field(new_id_lookup[value])
+        #     field.update(value, lang, dict_values[field_key])
 
-        unchanged_values = update_values & current_values
-        for value in unchanged_values:
-            field = field_lookup[value]
-            field.update(value, lang, dict_values[field_key])
+        # # check for things that were removed
+        # removed_values = current_values - update_values
+        # for value in removed_values:
+        #     field = field_lookup[value].get_value()
+        #     if field:
+        #         field.delete()
+
+        # unchanged_values = update_values & current_values
+        # for value in unchanged_values:
+        #     field = field_lookup[value]
+        #     field.update(value, lang, dict_values[field_key])
 
 
     def update_field(self, field, dict_values, lang):
@@ -139,10 +137,12 @@ class BaseModel(object):
     def update(self, dict_values, lang=get_language()):
         self.save()
         for field in self.complex_fields:
-            self.update_field(field, dict_values, lang)
+            if field.get_field_str_id() in dict_values:
+                self.update_field(field, dict_values, lang)
 
         for complex_list in self.complex_lists:
-            self.update_list(complex_list, dict_values, lang)
+            if complex_list.get_field_str_id() in dict_values:
+                self.update_list(complex_list, dict_values, lang)
 
     @classmethod
     def create(cls, dict_values, lang=get_language()):

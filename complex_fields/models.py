@@ -196,11 +196,12 @@ class ComplexFieldContainer(object):
             return sources
 
         c_fields = self.field_model.objects.filter(object_ref=self.table_object)
-        field = list(c_fields[:1])
-        if field:
-            sources = field[0].sources.all()
 
-        return sources
+        source_ids = []
+        for field in c_fields:
+            source_ids.extend([s.uuid for s in field.sources.all()])
+
+        return Source.objects.filter(uuid__in=source_ids)
 
     def get_confidence(self):
         field = self.get_field()
@@ -221,15 +222,16 @@ class ComplexFieldContainer(object):
         ):
             return
 
-        sources_updated = False
+        if c_field:
+            c_field.sources.set(sources['sources'], clear=True)
 
-        c_field.sources.set(sources['sources'], clear=True)
+            if self.translated:
+                c_field.lang = lang
 
-        if self.translated:
-            c_field.lang = lang
-
-        c_field.value = value
-        c_field.save()
+            c_field.value = value
+            c_field.save()
+        else:
+            self.update_new(value, lang, sources=sources)
 
     def update_new(self, value, lang, sources={}):
         if self.translated:
@@ -247,8 +249,7 @@ class ComplexFieldContainer(object):
         if self.sourced:
             c_field.confidence = sources['confidence']
             c_field.save()
-            for source in sources.get('sources', []):
-                c_field.sources.add(source)
+            c_field.sources.set(sources['sources'], clear=True)
 
     def adapt_value(self, value):
         c_field = self.field_model()
