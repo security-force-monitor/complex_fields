@@ -55,57 +55,25 @@ class BaseModel(object):
         # Implies a new format for lists of complex fields
         #
         # {'Person_PersonAlias: {
-        #     'values': ['list', 'of', 'string', 'values'],
+        #     'values': <queryset containing saved isntances of PersonAlias>,
         #     'sources': [],
         #     'confidence': 1,
         #     'field_name': 'aliases',
         #     }
         # }
 
-        complex_fields = complex_list.get_list()
         field_model = complex_list.field_model
-        table_object = complex_list.table_object
         field_key = complex_list.get_field_str_id()
 
-        update_values = set()
-        current_values = set()
+        update_values = set(dict_values[field_key]['values'])
+        current_values = set(field_model.objects.filter(object_ref=self))
 
-        for field in field_model.objects.filter(object_ref=self):
+        removed_values = current_values - update_values
+        for field in removed_values:
+            field.delete()
+
+        for field in update_values:
             field.sources.set(dict_values[field_key]['sources'], clear=True)
-
-        # TODO: Need to check to make sure Django is removing things as well
-        # when the form validation happens
-
-        # if complex_fields:
-
-        #     field_lookup = {v.get_value().value: v for v in complex_fields}
-
-        #     current_values = {v.get_value().value for v in complex_fields}
-
-        # new_id_lookup = {}
-
-        # for value in dict_values[field_key]['values']:
-        #     update_values.add(value.value)
-
-        # # check for new things
-        # new_values = update_values - current_values
-
-        # for value in new_values:
-        #     field = complex_list.get_complex_field(new_id_lookup[value])
-        #     field.update(value, lang, dict_values[field_key])
-
-        # # check for things that were removed
-        # removed_values = current_values - update_values
-        # for value in removed_values:
-        #     field = field_lookup[value].get_value()
-        #     if field:
-        #         field.delete()
-
-        # unchanged_values = update_values & current_values
-        # for value in unchanged_values:
-        #     field = field_lookup[value]
-        #     field.update(value, lang, dict_values[field_key])
-
 
     def update_field(self, field, dict_values, lang):
         field_name = field.get_field_str_id()
