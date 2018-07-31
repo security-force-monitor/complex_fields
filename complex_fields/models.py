@@ -215,13 +215,6 @@ class ComplexFieldContainer(object):
         else:
             c_field = self.get_field(None)
 
-        # No update needed if value or sources don't change
-        if (c_field is not None and
-            c_field.value == value and
-            self.has_same_sources(sources)
-        ):
-            return
-
         if c_field:
             c_field.sources.set(sources['sources'], clear=True)
 
@@ -248,7 +241,6 @@ class ComplexFieldContainer(object):
 
         if self.sourced:
             c_field.confidence = sources['confidence']
-            c_field.save()
             c_field.sources.set(sources['sources'], clear=True)
 
     def adapt_value(self, value):
