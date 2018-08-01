@@ -68,12 +68,21 @@ class BaseModel(object):
         update_values = set(dict_values[field_key]['values'])
         current_values = set(field_model.objects.filter(object_ref=self))
 
-        removed_values = current_values - update_values
-        for field in removed_values:
-            field.delete()
+        if update_values:
+            removed_values = current_values - update_values
 
-        for field in update_values:
-            field.sources.set(dict_values[field_key]['sources'], clear=True)
+            for field in removed_values:
+                field.delete()
+
+            for field in update_values:
+                field.save()
+                field.sources.set(dict_values[field_key]['sources'], clear=True)
+
+        else:
+            # If update values is empty, that means the user cleared out the
+            # field so delete everything.
+            for field in current_values:
+                field.delete()
 
     def update_field(self, field, dict_values, lang):
         field_name = field.get_field_str_id()
@@ -104,6 +113,7 @@ class BaseModel(object):
 
     def update(self, dict_values, lang=get_language()):
         self.save()
+
         for field in self.complex_fields:
             if field.get_field_str_id() in dict_values:
                 self.update_field(field, dict_values, lang)
