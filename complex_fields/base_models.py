@@ -1,7 +1,11 @@
+import django.dispatch
 from django.utils.translation import get_language
 from django.core.exceptions import ObjectDoesNotExist
 
 from source.models import Source
+
+object_ref_saved = django.dispatch.Signal(providing_args=["object_id"])
+
 
 class SourceRequiredException(Exception):
     def __init__(self, message):
@@ -17,6 +21,15 @@ class BaseModel(object):
 
     def __init__(self):
         pass
+
+    def object_ref_saved(self):
+        if hasattr(self, 'uuid'):
+            object_ref_saved.send(sender=self.__class__,
+                                  object_id=self.uuid)
+
+        else:
+            object_ref_saved.send(sender=self.__class__,
+                                  object_id=self.id)
 
     @classmethod
     def from_id(cls, id_):
