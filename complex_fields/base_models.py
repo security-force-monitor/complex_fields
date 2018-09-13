@@ -88,8 +88,14 @@ class BaseModel(object):
                 field.delete()
 
             for field in update_values:
-                field.save()
-                field.sources.set(dict_values[field_key]['sources'], clear=True)
+                if field.object_ref.id == complex_list.table_object.id:
+                    field.save()
+                    field.sources.set(dict_values[field_key]['sources'], clear=True)
+                else:
+                    new_object = field_model.objects.create(value=field.value,
+                                                            object_ref=complex_list.table_object,
+                                                            lang=field.lang)
+                    new_object.sources.set(dict_values[field_key]['sources'], clear=True)
 
         else:
             # If update values is empty, that means the user cleared out the
