@@ -24,4 +24,5 @@ def sourced(orig_cls):
 
 def sourced_optional(orig_cls):
     orig_cls.sourced = True
+    orig_cls.source_required = False
     return orig_cls

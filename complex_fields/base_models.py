@@ -108,7 +108,7 @@ class BaseModel(object):
 
         if field_name in dict_values:
 
-            if field.sourced:
+            if field.field_model.source_required:
 
                 try:
                     sources = dict_values[field_name]['sources']

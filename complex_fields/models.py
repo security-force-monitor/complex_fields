@@ -216,7 +216,8 @@ class ComplexFieldContainer(object):
             c_field = self.get_field(None)
 
         if c_field:
-            c_field.sources.set(sources['sources'], clear=True)
+            if c_field.source_required:
+                c_field.sources.set(sources['sources'], clear=True)
 
             if self.translated:
                 c_field.lang = lang
@@ -239,7 +240,7 @@ class ComplexFieldContainer(object):
 
         c_field.save()
 
-        if self.sourced:
+        if c_field.source_required:
             c_field.confidence = sources['confidence']
             c_field.sources.set(sources['sources'], clear=True)
 
