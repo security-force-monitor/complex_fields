@@ -11,7 +11,6 @@ from django.utils.translation import get_language
 from languages_plus.models import Language
 
 from source.models import AccessPoint, Source
-from translation.models import get_language_from_iso
 from sfm_pc.utils import class_for_name
 
 
@@ -173,6 +172,17 @@ class ComplexFieldContainer(object):
         field.value = value
         field.save()
 
+    def get_language_from_iso(self, iso):
+        try:
+            lang = Language.objects.get(iso_639_1=iso)
+        except Language.DoesNotExist:
+            return "Unknown"
+
+        if iso == get_language():
+            return lang.name_en
+        else:
+            return lang.name_en + ", " + lang.name_native
+
     def get_translations(self):
         translations = []
         if not hasattr(self.field_model, 'translated'):
@@ -183,7 +193,7 @@ class ComplexFieldContainer(object):
 
         for field in c_fields:
             trans = {
-                'lang': get_language_from_iso(field.lang),
+                'lang': self.get_language_from_iso(field.lang),
                 'value': field.value
             }
             translations.append(trans)

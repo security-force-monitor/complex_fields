@@ -20,8 +20,9 @@ setup(
     },
     zip_safe=False,
     install_requires=[
-        "Django>=1.8.3",
+        "Django>=1.8.3<2.0",
         "django-reversion==2.0.4",
+        "django-languages-plus==0.1.5",
     ],
     classifiers = [
         "Development Status :: 2 - Pre-Alpha",
