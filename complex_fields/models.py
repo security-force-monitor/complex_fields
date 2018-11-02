@@ -226,7 +226,7 @@ class ComplexFieldContainer(object):
             c_field = self.get_field(None)
 
         if c_field:
-            if c_field.source_required:
+            if getattr(c_field, 'source_required', False):
                 c_field.sources.set(sources['sources'], clear=True)
 
             if self.translated:
@@ -250,7 +250,7 @@ class ComplexFieldContainer(object):
 
         c_field.save()
 
-        if c_field.source_required:
+        if getattr(c_field, 'source_required',  False):
             c_field.confidence = sources['confidence']
             c_field.sources.set(sources['sources'], clear=True)
 

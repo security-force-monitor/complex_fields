@@ -90,12 +90,16 @@ class BaseModel(object):
             for field in update_values:
                 if field.object_ref.id == complex_list.table_object.id:
                     field.save()
-                    field.sources.set(dict_values[field_key]['sources'], clear=True)
+
+                    if getattr(field, 'source_required', False):
+                        field.sources.set(dict_values[field_key]['sources'], clear=True)
                 else:
                     new_object = field_model.objects.create(value=field.value,
                                                             object_ref=complex_list.table_object,
                                                             lang=field.lang)
-                    new_object.sources.set(dict_values[field_key]['sources'], clear=True)
+
+                    if getattr(field, 'source_required', False):
+                        new_object.sources.set(dict_values[field_key]['sources'], clear=True)
 
         else:
             # If update values is empty, that means the user cleared out the
@@ -108,7 +112,7 @@ class BaseModel(object):
 
         if field_name in dict_values:
 
-            if field.field_model.source_required:
+            if getattr(field.field_model, 'source_required', False):
 
                 try:
                     sources = dict_values[field_name]['sources']
