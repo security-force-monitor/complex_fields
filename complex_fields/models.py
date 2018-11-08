@@ -209,9 +209,9 @@ class ComplexFieldContainer(object):
 
         source_ids = []
         for field in c_fields:
-            source_ids.extend([s.uuid for s in field.sources.all()])
+            source_ids.extend([s.uuid for s in field.accesspoints.all()])
 
-        return Source.objects.filter(uuid__in=source_ids)
+        return AccessPoint.objects.filter(uuid__in=source_ids)
 
     def get_confidence(self):
         field = self.get_field()
@@ -227,7 +227,9 @@ class ComplexFieldContainer(object):
 
         if c_field:
             if getattr(c_field, 'source_required', False):
-                c_field.sources.set(sources['sources'], clear=True)
+                c_field.accesspoints.set(sources['sources'], clear=True)
+                for accesspoint in sources['sources']:
+                    c_field.sources.add(accesspoint.source)
 
             if self.translated:
                 c_field.lang = lang
@@ -252,7 +254,10 @@ class ComplexFieldContainer(object):
 
         if getattr(c_field, 'source_required',  False):
             c_field.confidence = sources['confidence']
-            c_field.sources.set(sources['sources'], clear=True)
+            c_field.accesspoints.set(sources['sources'], clear=True)
+
+            for accesspoint in sources['sources']:
+                c_field.sources.add(accesspoint.source)
 
     def adapt_value(self, value):
         c_field = self.field_model()
@@ -295,8 +300,9 @@ class ComplexFieldContainer(object):
             if self.sourced and not self.has_same_sources(sources):
                 sources_updated = True
                 field.sources.clear()
-                for source in sources['sources']:
-                    field.sources.add(source)
+                for accesspoint in sources['sources']:
+                    field.accesspoints.add(accesspoint)
+                    field.source.add(accesspoint.source)
                 field.confidence = sources['confidence']
 
             if field.lang != lang:

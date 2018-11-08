@@ -92,14 +92,23 @@ class BaseModel(object):
                     field.save()
 
                     if getattr(field, 'source_required', False):
-                        field.sources.set(dict_values[field_key]['sources'], clear=True)
+                        accesspoints = dict_values[field_key]['sources']
+                        field.accesspoints.set(accesspoints, clear=True)
+
+                        for accesspoint in accesspoints:
+                            field.sources.add(accesspoint.source)
                 else:
                     new_object = field_model.objects.create(value=field.value,
                                                             object_ref=complex_list.table_object,
                                                             lang=field.lang)
 
                     if getattr(field, 'source_required', False):
-                        new_object.sources.set(dict_values[field_key]['sources'], clear=True)
+
+                        accesspoints = dict_values[field_key]['sources']
+                        new_object.accesspoints.set(accesspoints, clear=True)
+
+                        for accesspoint in accesspoints:
+                            new_object.sources.add(accesspoint.source)
 
         else:
             # If update values is empty, that means the user cleared out the
