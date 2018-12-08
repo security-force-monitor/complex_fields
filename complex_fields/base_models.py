@@ -97,6 +97,9 @@ class BaseModel(object):
 
                         for accesspoint in accesspoints:
                             field.sources.add(accesspoint.source)
+
+                        field.confidence = dict_values[field_key]['confidence']
+                        field.save()
                 else:
                     new_object = field_model.objects.create(value=field.value,
                                                             object_ref=complex_list.table_object,
@@ -109,6 +112,9 @@ class BaseModel(object):
 
                         for accesspoint in accesspoints:
                             new_object.sources.add(accesspoint.source)
+
+                        new_object.confidence = dict_values[field_key]['confidence']
+                        new_object.save()
 
         else:
             # If update values is empty, that means the user cleared out the
