@@ -201,6 +201,7 @@ class ComplexFieldContainer(object):
         return translations
 
     def get_sources(self):
+
         sources = []
         if not self.sourced:
             return sources
@@ -230,6 +231,8 @@ class ComplexFieldContainer(object):
                 c_field.accesspoints.set(sources['sources'], clear=True)
                 for accesspoint in sources['sources']:
                     c_field.sources.add(accesspoint.source)
+
+                c_field.confidence = sources['confidence']
 
             if self.translated:
                 c_field.lang = lang
