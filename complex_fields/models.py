@@ -262,6 +262,8 @@ class ComplexFieldContainer(object):
             for accesspoint in sources['sources']:
                 c_field.sources.add(accesspoint.source)
 
+            c_field.save()
+
     def adapt_value(self, value):
         c_field = self.field_model()
         internal_type = c_field._meta.get_field('value').get_internal_type()
